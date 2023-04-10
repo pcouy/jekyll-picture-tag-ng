@@ -18,7 +18,7 @@ Additionally, you will need [ImageMagick](https://imagemagick.org/) installed on
 
 After installing, update your `_config.yml` to include the plugin :
 
-```
+```yaml
 plugins:   [other-plugins, jekyll-picture-tag-ng]
 ```
 
@@ -26,7 +26,7 @@ plugins:   [other-plugins, jekyll-picture-tag-ng]
 
 If you're using GitHub Pages to deploy your site, you'll need to use a custom action to be able to use this plugin and install ImageMagick. You can create such GitHub action by browsing to `https://github.com/{YOUR/REPO}/new/main?filename=.github%2Fworkflows%2Fjekyll.yml&workflow_template=pages%2Fjekyll`. You will need to add the following lines as a step for the build job of your GitHub action (before the `jekyll build` command) :
 
-```
+```yaml
 - name: Install imagemagick
   run: sudo apt-get update && sudo apt-get install imagemagick
 ```
