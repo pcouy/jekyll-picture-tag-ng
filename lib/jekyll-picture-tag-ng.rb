@@ -11,9 +11,12 @@ module Jekyll
   end
 
   module PictureTag
-    PICTURE_VERSIONS = {
-      "s" => "400",
-      "m" => "700"
+    CONFIG = {
+      "picture_versions" => {
+        "s" => "400",
+        "m" => "700"
+      },
+      "background_color" => "FFFFFF"
     }.freeze
 
     class Error < StandardError; end
@@ -23,9 +26,17 @@ module Jekyll
       def initialize(site, orig_static_file, version, pictype)
         super(site, site.source, orig_static_file.dir, orig_static_file.name)
         @version = version
-        @picture_dim = PICTURE_VERSIONS.merge(site.config["picture_versions"] || {})[@version]
+        @picture_dim = picture_versions[@version]
         @pictype = pictype
         @collection = nil
+      end
+
+      def config
+        @config ||= CONFIG.merge(@site.config["picture_tag_ng"] || {})
+      end
+
+      def picture_versions
+        config["picture_versions"]
       end
 
       def picture?
@@ -41,21 +52,21 @@ module Jekyll
       end
 
       def write(*args)
-        puts "write : #{args} Modified : #{modified?}"
+        Jekyll.logger.debug "write : #{args} Modified : #{modified?}"
         super(*args)
       end
 
       def popen_args(dest_path)
         args = ["convert", @path, "-resize", "#{@picture_dim}x>"]
         if @pictype == "jpg"
-          args.concat ["-background", "##{@site.config["background_color"]}",
+          args.concat ["-background", "##{@config["background_color"]}",
                        "-flatten", "-alpha", "off"]
         end
         args.push dest_path
       end
 
       def copy_file(dest_path)
-        puts "copy_file : #{path} -> #{dest_path}"
+        Jekyll.logger.debug "copy_file : #{path} -> #{dest_path}"
         p = IO.popen(popen_args(dest_path))
         p.close
         File.utime(self.class.mtimes[path], self.class.mtimes[path], dest_path)
@@ -68,10 +79,11 @@ module Jekyll
       priority :lowest
 
       def generate(site)
-        @picture_versions = PICTURE_VERSIONS.merge(site.config["picture_versions"] || {})
+        @config ||= CONFIG.merge(site.config["picture_tag_ng"] || {})
+        @picture_versions = @config["picture_versions"]
         new_statics = []
         site.static_files.filter { |f| f.extname =~ /(\.jpg|\.jpeg|\.webp)$/i }.each do |f|
-          @picture_versions.each do |v, _s|
+          @config["picture_versions"].each do |v, _s|
             img_f = OutImageFile.new(site, f, v, "jpg")
             new_statics << img_f
             img_f = OutImageFile.new(site, f, v, "webp")
@@ -83,6 +95,10 @@ module Jekyll
       end
     end
   end
+end
+
+Jekyll::Hooks.register :site, :after_init do |site|
+  Kramdown::Converter::JEKYLL_SITE = site
 end
 
 module Kramdown
@@ -99,7 +115,6 @@ module Kramdown
           el.attr["alt"] = alt_text
           el.attr["loading"] = el.attr["loading"] || "lazy"
           el.children.clear
-          # puts href
         end
         el.attr["title"] = title if title
         @tree.children << el
@@ -112,12 +127,20 @@ module Kramdown
   module Converter
     # Override Kramdown HTML converter
     class Html
+      def site_config
+        @site_config ||= Jekyll::PictureTag::CONFIG.merge(JEKYLL_SITE.config["picture_tag_ng"] || {})
+      end
+
+      def picture_versions
+        site_config["picture_versions"]
+      end
+
       def convert_img(el, _indent)
         require "cgi"
         res = "<picture>"
         new_src = el.attr["src"]
         if File.extname(el.attr["src"]) =~ /(\.jpg|\.jpeg|\.webp)$/i
-          Jekyll::PictureTag::PICTURE_VERSIONS.each_with_index do |(version, geometry), index|
+          picture_versions.each_with_index do |(version, geometry), index|
             src_base = File.join(
               "/img",
               version,
@@ -126,7 +149,7 @@ module Kramdown
               end.join("/"),
               File.basename(el.attr["src"], File.extname(el.attr["src"])).gsub(" ", "%20")
             )
-            if index == Jekyll::PictureTag::PICTURE_VERSIONS.size - 1
+            if index == picture_versions.size - 1
               media = ""
               new_src = "#{src_base}.jpg"
             else
