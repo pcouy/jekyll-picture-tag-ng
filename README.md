@@ -1,6 +1,6 @@
 # Jekyll Picture Tag NG
 
-This plugin will automatically generate variants of your pictures on build, and change the Kramdown rendering to use the variants with HTML picture tags when including pictures from markdown.
+This plugin will automatically generate variants of your pictures on build, and change the Kramdown rendering to use the variants with HTML picture tags when including pictures from markdown. Developped for and used on [Crocodile Couture](https://crocodile-couture.fr)
 
 ## Installation
 
