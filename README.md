@@ -22,9 +22,23 @@ After installing, update your `_config.yml` to include the plugin :
 plugins:   [other-plugins, jekyll-picture-tag-ng]
 ```
 
+or
+
+```yaml
+plugins:
+  - other-plugins
+  - jekyll-picture-tag-ng
+```
+
 ### Using with GitHub Pages
 
-If you're using GitHub Pages to deploy your site, you'll need to use a custom action to be able to use this plugin and install ImageMagick. You can create such GitHub action by browsing to `https://github.com/{YOUR/REPO}/new/main?filename=.github%2Fworkflows%2Fjekyll.yml&workflow_template=pages%2Fjekyll`. You will need to add the following lines as a step for the build job of your GitHub action (before the `jekyll build` command) :
+If you're using GitHub Pages to deploy your site, you'll need to use a custom action to be able to use this plugin and install ImageMagick. You can create such GitHub action by browsing to
+
+```
+https://github.com/{YOUR/REPO}/new/main?filename=.github%2Fworkflows%2Fjekyll.yml&workflow_template=pages%2Fjekyll
+```
+
+You will need to add the following lines as a step for the build job of your GitHub action (before the `jekyll build` command) :
 
 ```yaml
 - name: Install imagemagick
@@ -60,9 +74,13 @@ The example above is equivalent to the defaults.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After cloning the repo, you can run the following commands in a local jekyll website's folder to start hacking on the code of `jekyll-picture-tag-ng` (you'll need to replace the path in the second command :
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+    $ bundle remove jekyll-picture-tag-ng # if you previously used jekyll-picture-tag-ng from rubygems
+    $ bundle add --path /absolute/or/relative/path/to/your/local/jekyll-picture-tag-ng/repo jekyll-picture-tag-ng
+    $ bundle exec jekyll serve # Re-run this when you want to test changes to your local jekyll-picture-tag-ng
+
+To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
