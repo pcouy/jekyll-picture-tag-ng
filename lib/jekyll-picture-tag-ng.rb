@@ -96,6 +96,30 @@ Jekyll::Hooks.register :site, :after_init do |site|
   Kramdown::Converter::JEKYLL_SITE = site
 end
 
+module Jekyll
+  # Override the write methid to paralellize it
+  class Site
+    alias_method "old_write", "write"
+
+    def write
+      if config["picture_tag_ng"]["parallel"]
+        Jekyll.logger.info "Writing files in parallel (should not work on GH Pages)"
+        Jekyll::Commands::Doctor.conflicting_urls(self)
+        threads = []
+        each_site_file do |item|
+          threads << Thread.new { item.write(dest) } if regenerator.regenerate?(item)
+        end
+        threads.each(&:join)
+        regenerator.write_metadata
+        Jekyll::Hooks.trigger :site, :post_write, self
+        nil
+      else
+        old_write
+      end
+    end
+  end
+end
+
 module Kramdown
   module Parser
     # Override Kramdown parser

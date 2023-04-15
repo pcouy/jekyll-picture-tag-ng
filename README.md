@@ -61,6 +61,7 @@ Configuration is done in the `_config.yml` of your website, under the `picture_t
 
 ```yaml
 picture_tag_ng:
+  parallel: false
   background_color: FFFFFF
   picture_versions:
     m: 700
@@ -71,6 +72,7 @@ The example above is equivalent to the defaults.
 
 - `background_color` is the color used to replace transparency when converting from `webp` to `jpeg`
 - `picture_versions` maps version names to target widths in pixels. The default configuration above produces output files 700px wide in `img/m/` and 400px wide in `img/s/`.
+- `parallel` is a boolean indicating if you want to generate the output files in parallel threads. With a website that has a lot of large pictures, I get ~30% speed improvements when generating the site locally. However, this seems to make building the site with the recommended Github workflow fail.
 
 ## Development
 
