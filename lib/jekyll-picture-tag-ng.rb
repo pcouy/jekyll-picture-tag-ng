@@ -51,11 +51,6 @@ module Jekyll
         @destination[dest] ||= output_basename
       end
 
-      def write(*args)
-        Jekyll.logger.debug "write : #{args} Modified : #{modified?}"
-        super(*args)
-      end
-
       def popen_args(dest_path)
         args = ["convert", @path, "-resize", "#{@picture_dim}x>"]
         if @pictype == "jpg"
@@ -99,6 +94,23 @@ end
 
 Jekyll::Hooks.register :site, :after_init do |site|
   Kramdown::Converter::JEKYLL_SITE = site
+end
+
+module Jekyll
+  # Override the write methid to paralellize it
+  class Site
+    def write
+      Jekyll::Commands::Doctor.conflicting_urls(self)
+      threads = []
+      each_site_file do |item|
+        threads << Thread.new { item.write(dest) }  if regenerator.regenerate?(item)
+      end
+      threads.each(&:join)
+      regenerator.write_metadata
+      Jekyll::Hooks.trigger :site, :post_write, self
+      nil
+    end
+  end
 end
 
 module Kramdown
