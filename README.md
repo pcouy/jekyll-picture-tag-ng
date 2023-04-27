@@ -1,6 +1,6 @@
 # Jekyll Picture Tag NG
 
-This plugin will automatically generate variants of your pictures on build, and change the Kramdown rendering to use the variants with HTML picture tags when including pictures from markdown. Developped for and used on [Crocodile Couture](https://crocodile-couture.fr)
+This plugin will automatically generate variants of your pictures on build, and change the Kramdown rendering to use the variants with HTML picture tags when including pictures from markdown. Developed for and used on [Crocodile Couture](https://crocodile-couture.fr)
 
 ## Installation
 
@@ -78,13 +78,13 @@ The example above is equivalent to the defaults.
 
 ## Development
 
-After cloning the repo, you can run the following commands in a local jekyll website's folder to start hacking on the code of `jekyll-picture-tag-ng` (you'll need to replace the path in the second command :
+After cloning the repo, you can run the following commands in a local Jekyll website's folder to start hacking on the code of `jekyll-picture-tag-ng` (you'll need to replace the path in the second command) :
 
     $ bundle remove jekyll-picture-tag-ng # if you previously used jekyll-picture-tag-ng from rubygems
     $ bundle add --path /absolute/or/relative/path/to/your/local/jekyll-picture-tag-ng/repo jekyll-picture-tag-ng
     $ bundle exec jekyll serve # Re-run this when you want to test changes to your local jekyll-picture-tag-ng
 
-To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [the Rubygems repository](https://rubygems.org).
 
 ## Contributing
 
