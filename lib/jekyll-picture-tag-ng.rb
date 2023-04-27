@@ -127,6 +127,10 @@ module Jekyll
       end
     end
 
+    def reset_thread_pool
+      @thread_pool = nil
+    end
+
     def next_task
       @task_queue ||= []
       @task_queue.shift
@@ -148,6 +152,7 @@ module Jekyll
           add_task { -1 }
         end
         thread_pool.each(&:join)
+        reset_thread_pool
         regenerator.write_metadata
         Jekyll::Hooks.trigger :site, :post_write, self
         nil

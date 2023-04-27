@@ -53,7 +53,7 @@ By installing the plugin and activating it, `jekyll build` and `jekyll serve` co
 
 When using the default markdown syntax for including pictures (`![Alt text](PICTURE_URL)`) with the Kramdown renderer, `<picture>` tags with appropriate `<source>` children tags will be output.
 
-When working locally, it is recommended to use the `--incremental` option which will prevent Jekyll from re-generating all the picture versions (can take quite some time) every time you save a file. However, there is a catch : when using `--incremental`, if you edit your configuration file to change the output formats and build again, your pages will not be updated with the appropriate `<source>` tags for the new versions.
+When working locally, you can use the `--incremental` option to prevent Jekyll from re-generating all the pictures (which can take a long time) when re-launching the `jekyll serve` command. This is useful when developing a plugin or tweaking the `_config.yml` file (which both require you to frequently re-launch the `jekyll serve` command). However, be careful about using this option when changing the plugin's output image formats : the plugin will skip generating the new output formats in `--incremental` mode for pictures that were previously generated for the old output formats.
 
 ### Configuration
 
