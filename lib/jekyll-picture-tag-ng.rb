@@ -201,7 +201,6 @@ module Kramdown
         require "cgi"
         res = "<picture>"
         new_src = el.attr["src"]
-        puts el.attr["src"]
         if File.extname(el.attr["src"]) =~ /(\.jpg|\.jpeg|\.webp)$/i &&
            el.attr["src"] !~ %r{^https?://}
           picture_versions.each_with_index do |(version, geometry), index|
