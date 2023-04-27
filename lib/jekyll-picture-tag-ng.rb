@@ -139,7 +139,7 @@ module Jekyll
 
     def write
       if config["picture_tag_ng"]["parallel"]
-        Jekyll.logger.info "Writing files in parallel (should not work on GH Pages)"
+        Jekyll.logger.info "Writing files in parallel"
         Jekyll::Commands::Doctor.conflicting_urls(self)
         each_site_file do |item|
           regenerator.regenerate?(item) && add_task { item.write(dest) }
