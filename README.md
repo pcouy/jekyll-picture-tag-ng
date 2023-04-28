@@ -159,6 +159,16 @@ to the following HTML :
 </picture>
 ```
 
+Additionally, you can provide an `extra_convert_args` option, which must be an array of strings. This will not affect the output HTML, but will allow you to pass any [convert option](https://imagemagick.org/script/convert.php) based on the version. For instance, the following will produce blurred images :
+
+```yaml
+picture_tag_ng:
+  picture_versions:
+    m:
+      out_size: 700
+      extra_convert_args: ["-scale", "20%", "-blur", "0x2.5", "-resize", "500%"]
+```
+
 ## Development
 
 After cloning the repo, you can run the following commands in a local Jekyll website's folder to start hacking on the code of `jekyll-picture-tag-ng` (you'll need to replace the path in the second command) :

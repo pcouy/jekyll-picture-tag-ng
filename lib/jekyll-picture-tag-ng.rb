@@ -31,6 +31,10 @@ module Jekyll
                        else
                          picture_versions[@version]
                        end
+        @convert_args = picture_versions[@version].is_a?(Hash) &&
+                        picture_versions[@version]["extra_convert_args"] || []
+        @replace_args = picture_versions[@version].is_a?(Hash) &&
+                        picture_versions[@version]["replace_convert_args"] || false
         @pictype = pictype
         @collection = nil
       end
@@ -56,16 +60,18 @@ module Jekyll
       end
 
       def popen_args(dest_path)
-        args = ["convert", @path, "-resize", "#{@picture_dim}x>"]
+        args = ["convert", @path]
+        args.concat ["-resize", "#{@picture_dim}x>"] unless @replace_args
         if @pictype == "jpg"
           args.concat ["-background", "##{@config["background_color"]}",
                        "-flatten", "-alpha", "off"]
         end
+        args.concat @convert_args
         args.push dest_path
       end
 
       def copy_file(dest_path)
-        Jekyll.logger.debug "copy_file : #{path} -> #{dest_path}"
+        Jekyll.logger.debug "copy_file : #{path} -> #{dest_path} (#{popen_args(dest_path)})"
         p = IO.popen(popen_args(dest_path))
         p.close
         File.utime(self.class.mtimes[path], self.class.mtimes[path], dest_path)
