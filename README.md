@@ -155,7 +155,8 @@ to the following HTML :
     <source media="screen and (max-width: 1200px)" srcset="/img/l/path/to/img/orig.jpg" type="image/jpeg">
     <source srcset="/img/xl/path/to/img/orig.webp" type="image/webp">
     <source srcset="/img/xl/path/to/img/orig.jpg" type="image/jpeg">
-    <img src="/img/xl/path/to/img/orig.jpg" alt="Alt text" loading="lazy"></picture>
+    <img src="/img/xl/path/to/img/orig.jpg" alt="Alt text" loading="lazy">
+</picture>
 ```
 
 ## Development
