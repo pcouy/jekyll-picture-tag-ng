@@ -176,6 +176,8 @@ picture_tag_ng:
     s: 400
 ```
 
+You can disable the default resize operation by setting `replace_convert_args: true` either at the plugin level or at the version level. If the, the version-specific value will override the plugin-global value.
+
 ## Development
 
 After cloning the repo, you can run the following commands in a local Jekyll website's folder to start hacking on the code of `jekyll-picture-tag-ng` (you'll need to replace the path in the second command) :

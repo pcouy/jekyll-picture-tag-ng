@@ -17,7 +17,8 @@ module Jekyll
         "m" => "700"
       },
       "background_color" => "FFFFFF",
-      "extra_convert_args" => []
+      "extra_convert_args" => [],
+      "replace_convert_args" => false
     }.freeze
 
     class Error < StandardError; end
@@ -32,14 +33,21 @@ module Jekyll
                        else
                          picture_versions[@version]
                        end
-        @replace_args = picture_versions[@version].is_a?(Hash) &&
-                        picture_versions[@version]["replace_convert_args"] || false
         @pictype = pictype
         @collection = nil
       end
 
       def config
         @config ||= CONFIG.merge(@site.config["picture_tag_ng"] || {})
+      end
+
+      def replace_args
+        result = config["replace_convert_args"]
+        if picture_versions[@version].is_a?(Hash) &&
+           !picture_versions[@version]["replace_convert_args"].nil?
+          result = picture_versions[@version]["replace_convert_args"]
+        end
+        result
       end
 
       def picture_versions
@@ -79,7 +87,10 @@ module Jekyll
 
       def destination(dest)
         output_dir = File.join("img", @version, @dir)
-        output_basename = @site.in_dest_dir(@site.dest, File.join(output_dir, "#{basename}.#{@pictype}"))
+        output_basename = @site.in_dest_dir(
+          @site.dest,
+          File.join(output_dir, "#{basename}.#{@pictype}")
+        )
         FileUtils.mkdir_p(File.dirname(output_dir))
         @destination ||= {}
         @destination[dest] ||= output_basename
@@ -88,7 +99,7 @@ module Jekyll
       def popen_args(dest_path)
         args = ["convert", @path]
         args.concat pre_convert_args
-        args.concat ["-resize", "#{@picture_dim}x>"] unless @replace_args
+        args.concat ["-resize", "#{@picture_dim}x>"] unless replace_args
         if @pictype == "jpg"
           args.concat ["-background", "##{@config["background_color"]}",
                        "-flatten", "-alpha", "off"]
