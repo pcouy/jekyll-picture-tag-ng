@@ -159,14 +159,21 @@ to the following HTML :
 </picture>
 ```
 
-Additionally, you can provide an `extra_convert_args` option, which must be an array of strings. This will not affect the output HTML, but will allow you to pass any [convert option](https://imagemagick.org/script/convert.php) based on the version. For instance, the following will produce blurred images :
+#### Extra `convert` arguments
+
+The `extra_convert_args` and `pre_extra_convert_args` options allow you to add any [`convert` argument](https://imagemagick.org/script/convert.php) to the image conversion processes. The `pre_extra_convert_args` will be added before the resize operation, and the `extra_convert_args` after the resize operation. These options must be either arrays of strings or a string that will be split on spaces. This can be used to add a watermark to all your pictures (see example below).
+
+Additionally, you can set different values based on the version for both these options. In the example below, the `m` version of output pictures will be blurred :
 
 ```yaml
 picture_tag_ng:
+  pre_extra_convert_args: ["-font", "DejaVu-Sans-Book", "-pointsize", "72",
+    "-fill", "black", "-annotate", "+25+75", "Watermark"] # Add watermark to all output pics
   picture_versions:
     m:
       out_size: 700
-      extra_convert_args: ["-scale", "20%", "-blur", "0x2.5", "-resize", "500%"]
+      extra_convert_args: ["-scale", "20%", "-blur", "0x2.5", "-resize", "500%"] # Blur `m` pics
+    s: 400
 ```
 
 ## Development

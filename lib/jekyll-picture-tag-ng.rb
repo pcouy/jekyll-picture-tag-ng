@@ -16,7 +16,8 @@ module Jekyll
         "s" => "400",
         "m" => "700"
       },
-      "background_color" => "FFFFFF"
+      "background_color" => "FFFFFF",
+      "extra_convert_args" => []
     }.freeze
 
     class Error < StandardError; end
@@ -31,8 +32,6 @@ module Jekyll
                        else
                          picture_versions[@version]
                        end
-        @convert_args = picture_versions[@version].is_a?(Hash) &&
-                        picture_versions[@version]["extra_convert_args"] || []
         @replace_args = picture_versions[@version].is_a?(Hash) &&
                         picture_versions[@version]["replace_convert_args"] || false
         @pictype = pictype
@@ -45,6 +44,33 @@ module Jekyll
 
       def picture_versions
         config["picture_versions"]
+      end
+
+      def as_args(input)
+        if input.is_a?(Array)
+          input.clone
+        elsif input.is_a?(String)
+          input.split(" ")
+        else
+          raise(
+            TypeError,
+            "[jekyll-picture-tag-ng] `extra_convert_args` must be an array or a string"
+          )
+        end
+      end
+
+      def convert_args
+        @convert_args ||= as_args(config["extra_convert_args"]).concat(
+          picture_versions[@version].is_a?(Hash) &&
+          picture_versions[@version]["extra_convert_args"] || []
+        )
+      end
+
+      def pre_convert_args
+        @pre_convert_args ||= as_args(config["pre_extra_convert_args"]).concat(
+          picture_versions[@version].is_a?(Hash) &&
+          picture_versions[@version]["pre_extra_convert_args"] || []
+        )
       end
 
       def picture?
@@ -61,12 +87,13 @@ module Jekyll
 
       def popen_args(dest_path)
         args = ["convert", @path]
+        args.concat pre_convert_args
         args.concat ["-resize", "#{@picture_dim}x>"] unless @replace_args
         if @pictype == "jpg"
           args.concat ["-background", "##{@config["background_color"]}",
                        "-flatten", "-alpha", "off"]
         end
-        args.concat @convert_args
+        args.concat convert_args
         args.push dest_path
       end
 
@@ -231,21 +258,17 @@ module Kramdown
       end
 
       def media_attribute(version)
-        if version == default_pic_version
-          ""
-        else
-          geometry = picture_versions[version]
-          if geometry.is_a?(Hash)
-            if geometry["media"].is_a?(String)
-              "media=\"#{geometry["media"]}\""
-            elsif geometry["media"].is_a?(Integer)
-              "media=\"(max-width: #{geometry["media"]}px)\""
-            else
-              "media=\"(max-width: #{geometry["out_size"]}px)\""
-            end
+        geometry = picture_versions[version]
+        if geometry.is_a?(Hash)
+          if geometry["media"].is_a?(String)
+            "media=\"#{geometry["media"]}\""
+          elsif geometry["media"].is_a?(Integer)
+            "media=\"(max-width: #{geometry["media"]}px)\""
           else
-            "media=\"(max-width: #{geometry}px)\""
+            "media=\"(max-width: #{geometry["out_size"]}px)\""
           end
+        else
+          "media=\"(max-width: #{geometry}px)\""
         end
       end
 
