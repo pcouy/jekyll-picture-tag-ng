@@ -72,9 +72,91 @@ picture_tag_ng:
 The example above is equivalent to the defaults.
 
 - `background_color` is the color used to replace transparency when converting from `webp` to `jpeg`
-- `picture_versions` maps version names to target widths in pixels. The default configuration above produces output files 700px wide in `img/m/` and 400px wide in `img/s/`.
+- `picture_versions` in the simplest form, maps version names to target widths in pixels. The default configuration above produces output files 700px wide in `img/m/` and 400px wide in `img/s/`. See below for more complex forms.
 - `parallel` is a boolean indicating if you want to generate the output files in parallel threads. With a website that has a lot of large pictures, I get ~30% speed improvements when generating the site locally.
 - `threads` is the number of concurrent threads for generating the website (only used if `parallel` is `true`)
+
+#### `picture_versions` option
+
+The `picture_versions` option must be a map. The keys are the version identifiers, and the values control the output for each version. The values can be defined in one of the following formats :
+
+```yaml
+picture_tag_ng:
+  picture_versions:
+    s: 400
+```
+
+When the version consists only of an integer, the value is used for both the output width and the corresponding `max-width` media attribute.
+
+```yaml
+picture_tag_ng:
+  picture_versions:
+    s:
+      out_size: 400
+```
+
+Each version can be defined as a map, with the `out_size` key being required (must be an integer). This value controls the output width for the version. If `out_size` is the only defined key, it is also used for the corresponding `max-with` media attribute.
+
+```yaml
+picture_tag_ng:
+  picture_versions:
+    m:
+      out_size: 700
+      media: 1200
+```
+
+Each version that is a map can define the `media` key. If the value is an integer, produces `(max-width: #{media_integer_from_conf}px)` for the associated media attribute.
+
+```yaml
+picture_tag_ng:
+  picture_versions:
+    m:
+      out_size: 700
+      media: "screen and (max-width: 1200px)"
+```
+
+If `media` is a string, its value is used as-is for the corresponding media attribute.
+
+Additionally, you can add the `default: true` property to any version to remove the corresponding media attribute from HTML `source` elements, and use this version as the `src` for the default HTML `img` element. If no version is explicitly set as the default, the largest one will me used.
+
+The following configuration shows one version for each allowed format :
+
+```yaml
+picture_tag_ng:
+  picture_versions:
+    s:
+      out_size: 400
+    m:
+      out_size: 700
+      media: 1200
+    l:
+      out_size: 1200
+      media: "screen and (max-width: 1200px)"
+    xl:
+      out_size: 2000
+      default: true
+```
+
+When using the above configuration, the plugin will convert
+
+```md
+![Alt text](/path/to/img/orig.jpg)
+```
+
+to the following HTML :
+
+```html
+<picture>
+    <source media="(max-width: 400px)" srcset="/img/s/path/to/img/orig.webp" type="image/webp">
+    <source media="(max-width: 400px)" srcset="/img/s/path/to/img/orig.jpg" type="image/jpeg">
+    <source media="(max-width: 1200px)" srcset="/img/m/path/to/img/orig.webp" type="image/webp">
+    <source media="(max-width: 1200px)" srcset="/img/m/path/to/img/orig.jpg" type="image/jpeg">
+    <source media="screen and (max-width: 1200px)" srcset="/img/l/path/to/img/orig.webp" type="image/webp">
+    <source media="screen and (max-width: 1200px)" srcset="/img/l/path/to/img/orig.jpg" type="image/jpeg">
+    <source srcset="/img/xl/path/to/img/orig.webp" type="image/webp">
+    <source srcset="/img/xl/path/to/img/orig.jpg" type="image/jpeg">
+    <img src="/img/xl/path/to/img/orig.jpg" alt="Alt text" loading="lazy"></picture>
+```
 
 ## Development
 

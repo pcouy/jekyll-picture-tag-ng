@@ -26,7 +26,11 @@ module Jekyll
       def initialize(site, orig_static_file, version, pictype)
         super(site, site.source, orig_static_file.dir, orig_static_file.name)
         @version = version
-        @picture_dim = picture_versions[@version]
+        @picture_dim = if picture_versions[@version].is_a?(Hash)
+                         picture_versions[@version]["out_size"]
+                       else
+                         picture_versions[@version]
+                       end
         @pictype = pictype
         @collection = nil
       end
@@ -197,13 +201,55 @@ module Kramdown
         site_config["picture_versions"]
       end
 
+      def _get_default_pic_version
+        largest_version = ""
+        largest_size = 0
+        picture_versions.each do |version, geometry|
+          size = if geometry.is_a?(Integer)
+                   geometry
+                 elsif geometry["default"]
+                   999_999_999
+                 else
+                   geometry["out_size"]
+                 end
+          if size > largest_size
+            largest_version = version
+            largest_size = size
+          end
+        end
+        largest_version
+      end
+
+      def default_pic_version
+        @default_pic_version ||= _get_default_pic_version
+      end
+
+      def media_attribute(version)
+        if version == default_pic_version
+          ""
+        else
+          geometry = picture_versions[version]
+          if geometry.is_a?(Hash)
+            if geometry["media"].is_a?(String)
+              "media=\"#{geometry["media"]}\""
+            elsif geometry["media"].is_a?(Integer)
+              "media=\"(max-width: #{geometry["media"]}px)\""
+            else
+              "media=\"(max-width: #{geometry["out_size"]}px)\""
+            end
+          else
+            "media=\"(max-width: #{geometry}px)\""
+          end
+        end
+      end
+
       def convert_img(el, _indent)
         require "cgi"
         res = "<picture>"
         new_src = el.attr["src"]
         if File.extname(el.attr["src"]) =~ /(\.jpg|\.jpeg|\.webp)$/i &&
            el.attr["src"] !~ %r{^https?://}
-          picture_versions.each_with_index do |(version, geometry), index|
+          picture_versions.each do |version, _geometry|
             src_base = File.join(
               "/img",
               version,
@@ -212,12 +258,8 @@ module Kramdown
               end.join("/"),
               File.basename(el.attr["src"], File.extname(el.attr["src"])).gsub(" ", "%20")
             )
-            if index == picture_versions.size - 1
-              media = ""
-              new_src = "#{src_base}.jpg"
-            else
-              media = "media=\"(max-width: #{geometry}px)\""
-            end
+            media = media_attribute(version)
+            new_src = "#{src_base}.jpg" if version == default_pic_version
             res += "<source #{media} srcset=\"#{src_base}.webp\" type=\"image/webp\">"
             res += "<source #{media} srcset=\"#{src_base}.jpg\" type=\"image/jpeg\">"
           end
