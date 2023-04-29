@@ -55,14 +55,16 @@ module Jekyll
       end
 
       def as_args(input)
-        if input.is_a?(Array)
+        if input.nil?
+          []
+        elsif input.is_a?(Array)
           input.clone
         elsif input.is_a?(String)
           input.split(" ")
         else
           raise(
             TypeError,
-            "[jekyll-picture-tag-ng] `extra_convert_args` must be an array or a string"
+            "[jekyll-picture-tag-ng] `extra_convert_args` must be an array or a string (#{input})"
           )
         end
       end
