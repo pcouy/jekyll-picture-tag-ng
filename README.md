@@ -32,7 +32,7 @@ plugins:
 
 ### Using with GitHub Pages
 
-If you're using GitHub Pages to deploy your site, you'll need to use a custom action to be able to use this plugin and install ImageMagick. You can create such GitHub action by browsing to
+If you're using GitHub Pages to deploy your site, you'll need to use a custom action to be able to use this plugin and install ImageMagick/libvips. You can create such GitHub action by browsing to
 
 ```
 https://github.com/{YOUR/REPO}/new/main?filename=.github%2Fworkflows%2Fjekyll.yml&workflow_template=pages%2Fjekyll
@@ -41,9 +41,11 @@ https://github.com/{YOUR/REPO}/new/main?filename=.github%2Fworkflows%2Fjekyll.ym
 You will need to add the following lines as a step for the build job of your GitHub action (before the `jekyll build` command) :
 
 ```yaml
-- name: Install imagemagick
-  run: sudo apt-get update && sudo apt-get install imagemagick
+- name: Install imagemagick and libvips
+  run: sudo apt-get update && sudo apt-get install imagemagick libvips-tools
 ```
+
+If you do not intend to use the `libvips` backend (see Configuration), you should remove `libvips-tools` from the `apt-get install` command above, as installing it takes some time (still a lot less than generating all versions with Image Magick)
 
 After adding the custom action to your repository, you'll need to update the repository settings on GitHub : go to the "Pages" section and change the "Source" setting from "Deploy from a branch" to "GitHub Actions".
 
