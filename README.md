@@ -61,6 +61,7 @@ Configuration is done in the `_config.yml` of your website, under the `picture_t
 
 ```yaml
 picture_tag_ng:
+  backend: imagemagick
   parallel: false
   threads: 16
   background_color: FFFFFF
@@ -71,6 +72,7 @@ picture_tag_ng:
 
 The example above is equivalent to the defaults.
 
+- `backend` can be either `imagemagick` (more well-tested) or `libvips` (a lot faster but less tested)
 - `background_color` is the color used to replace transparency when converting from `webp` to `jpeg`
 - `picture_versions` in the simplest form, maps version names to target widths in pixels. The default configuration above produces output files 700px wide in `img/m/` and 400px wide in `img/s/`. See below for more complex forms.
 - `parallel` is a boolean indicating if you want to generate the output files in parallel threads. With a website that has a lot of large pictures, I get ~30% speed improvements when generating the site locally.
@@ -160,6 +162,8 @@ to the following HTML :
 ```
 
 #### Extra `convert` arguments
+
+:warning: The options in this section will do nothing when used with the `libvips` backend :warning:
 
 The `extra_convert_args` and `pre_extra_convert_args` options allow you to add any [`convert` argument](https://imagemagick.org/script/convert.php) to the image conversion processes. The `pre_extra_convert_args` will be added before the resize operation, and the `extra_convert_args` after the resize operation. These options must be either arrays of strings or a string that will be split on spaces. This can be used to add a watermark to all your pictures (see example below).
 

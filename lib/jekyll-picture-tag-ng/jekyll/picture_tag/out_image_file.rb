@@ -18,13 +18,19 @@ module Jekyll
       end
 
       def copy_file(dest_path)
-        Jekyll.logger.debug "copy_file : #{path} -> #{dest_path} (#{popen_args(dest_path)})"
-        p = IO.popen(popen_args(dest_path))
+        cmd = if config["backend"] == "libvips"
+                vips_popen_args dest_path
+              else
+                imagemagick_popen_args dest_path
+              end
+        Jekyll.logger.debug "copy_file : #{path} -> #{dest_path} (#{cmd})"
+        p = IO.popen(cmd, err: %i[child out])
+        Jekyll.logger.debug "command_output :\n    #{p.readlines.join("    ")}"
         p.close
         File.utime(self.class.mtimes[path], self.class.mtimes[path], dest_path)
       end
 
-      def popen_args(dest_path)
+      def imagemagick_popen_args(dest_path)
         args = ["convert", @path]
         args.concat pre_convert_args
         args.concat ["-resize", "#{@picture_dim}x>"] unless replace_args
@@ -34,6 +40,14 @@ module Jekyll
         end
         args.concat convert_args
         args.push dest_path
+      end
+
+      def vips_popen_args(dest_path)
+        args = ["vips", "thumbnail", @path]
+        dest_path = dest_path.clone.concat "[background=#{rgb_bg_color}]" if @pictype == "jpg"
+        args.push dest_path
+        args.push @picture_dim.to_s
+        args.concat ["--size", "down", "--height", "999999"]
       end
 
       def destination(dest)
@@ -60,6 +74,11 @@ module Jekyll
             "[jekyll-picture-tag-ng] `extra_convert_args` must be an array or a string (#{input})"
           )
         end
+      end
+
+      def rgb_bg_color
+        hex = config["background_color"]
+        @rgb_bg_color ||= "#{hex.slice(0, 2).to_i(16)} #{hex.slice(2, 2).to_i(16)} #{hex.slice(4, 2).to_i(16)}"
       end
 
       def picture?

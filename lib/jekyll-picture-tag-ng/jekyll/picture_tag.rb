@@ -7,7 +7,9 @@ module Jekyll
   class Error < StandardError; end
 
   module PictureTag
+    # Module's default config
     CONFIG = {
+      "backend" => "imagemagick",
       "picture_versions" => {
         "s" => "400",
         "m" => "700"
