@@ -8,7 +8,7 @@ module Jekyll
     alias_method "old_write", "write"
 
     def write
-      if config["picture_tag_ng"]["parallel"]
+      if conf_parallel
         Jekyll.logger.info "Writing files in parallel"
         Jekyll::Commands::Doctor.conflicting_urls(self)
         each_site_file do |item|
@@ -50,7 +50,11 @@ module Jekyll
     end
 
     def n_threads
-      config["picture_tag_ng"]["threads"] || 8
+      config.dig "picture_tag_ng", "threads" || 8
+    end
+
+    def conf_parallel
+      config.dig "picture_tag_ng", "parallel" || false
     end
 
     def reset_thread_pool
